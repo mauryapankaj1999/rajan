@@ -10,10 +10,20 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // import { LocationData, LocationInfo } from '../utils/locationService';
-import LocationService, { LocationData, LocationError, LocationInfo } from '../utils/locationService';
+import LocationService, {
+  LocationData,
+  LocationError,
+  LocationInfo,
+} from '../utils/locationService';
 
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 export default function CurrentLocation() {
-    const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<LocationData | null>(
+    null,
+  );
   const [locationInfo, setLocationInfo] = useState<LocationInfo | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState<boolean>(false);
   const [locationError, setLocationError] = useState<string>('');
@@ -21,7 +31,7 @@ export default function CurrentLocation() {
   useEffect(() => {
     getCurrentLocation();
     startLocationTracking();
-    
+
     return () => {
       LocationService.stopWatchingLocation();
     };
@@ -30,16 +40,16 @@ export default function CurrentLocation() {
   const getCurrentLocation = async () => {
     setIsLoadingLocation(true);
     setLocationError('');
-    
+
     try {
       const location = await LocationService.getCurrentLocation();
       setCurrentLocation(location);
       console.log('Location received:', location);
-      
+
       // Get detailed location info including pincode
       const locationInfo = await LocationService.getLocationInfoFromCoordinates(
         location.latitude,
-        location.longitude
+        location.longitude,
       );
       console.log('Location info received:', locationInfo);
       setLocationInfo(locationInfo);
@@ -47,7 +57,7 @@ export default function CurrentLocation() {
       const locationError = error as LocationError;
       console.log('Location error:', locationError);
       setLocationError(locationError.message);
-      
+
       if (locationError.code === 1) {
         LocationService.showLocationPermissionAlert();
       }
@@ -58,17 +68,17 @@ export default function CurrentLocation() {
 
   const startLocationTracking = () => {
     LocationService.startWatchingLocation(
-      (location) => {
+      location => {
         setCurrentLocation(location);
         // Update location info periodically (every 30 seconds)
         LocationService.getLocationInfoFromCoordinates(
           location.latitude,
-          location.longitude
+          location.longitude,
         ).then(setLocationInfo);
       },
-      (error) => {
+      error => {
         setLocationError(error.message);
-      }
+      },
     );
   };
 
@@ -76,19 +86,25 @@ export default function CurrentLocation() {
     if (locationError) {
       getCurrentLocation();
     } else {
-      const locationDetails = locationInfo 
-        ? `Address: ${locationInfo.address}\nCity: ${locationInfo.city}\nState: ${locationInfo.state}\nPincode: ${locationInfo.pincode}\nCountry: ${locationInfo.country}\n\nCoordinates: ${currentLocation?.latitude.toFixed(4)}, ${currentLocation?.longitude.toFixed(4)}`
-        : `Coordinates: ${currentLocation?.latitude.toFixed(4)}, ${currentLocation?.longitude.toFixed(4)}`;
-      
-      Alert.alert(
-        'Delivery Location',
-        locationDetails,
-        [
-          { text: 'OK' },
-          { text: 'Refresh Location', onPress: getCurrentLocation },
-          { text: 'Change Location', onPress: handleChangeLocation },
-        ]
-      );
+      const locationDetails = locationInfo
+        ? `Address: ${locationInfo.address}\nCity: ${
+            locationInfo.city
+          }\nState: ${locationInfo.state}\nPincode: ${
+            locationInfo.pincode
+          }\nCountry: ${
+            locationInfo.country
+          }\n\nCoordinates: ${currentLocation?.latitude.toFixed(
+            4,
+          )}, ${currentLocation?.longitude.toFixed(4)}`
+        : `Coordinates: ${currentLocation?.latitude.toFixed(
+            4,
+          )}, ${currentLocation?.longitude.toFixed(4)}`;
+
+      Alert.alert('Delivery Location', locationDetails, [
+        { text: 'OK' },
+        { text: 'Refresh Location', onPress: getCurrentLocation },
+        { text: 'Change Location', onPress: handleChangeLocation },
+      ]);
     }
   };
 
@@ -100,7 +116,7 @@ export default function CurrentLocation() {
         { text: 'Cancel', style: 'cancel' },
         { text: 'Use Current Location', onPress: getCurrentLocation },
         { text: 'Enter Pincode', onPress: handleEnterPincode },
-      ]
+      ],
     );
   };
 
@@ -110,36 +126,42 @@ export default function CurrentLocation() {
       'Please enter your delivery pincode:',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Set', 
+        {
+          text: 'Set',
           onPress: (pincode: string | undefined) => {
             if (pincode && pincode.trim()) {
               // Set the pincode manually
-              setLocationInfo(prev => prev ? {
-                ...prev,
-                pincode: pincode.trim()
-              } : {
-                address: 'Manual Entry',
-                pincode: pincode.trim(),
-                city: 'Unknown',
-                state: 'Unknown',
-                country: 'Unknown',
-              });
-              Alert.alert('Pincode Set', `Delivery location set to pincode: ${pincode}`);
+              setLocationInfo(prev =>
+                prev
+                  ? {
+                      ...prev,
+                      pincode: pincode.trim(),
+                    }
+                  : {
+                      address: 'Manual Entry',
+                      pincode: pincode.trim(),
+                      city: 'Unknown',
+                      state: 'Unknown',
+                      country: 'Unknown',
+                    },
+              );
+              Alert.alert(
+                'Pincode Set',
+                `Delivery location set to pincode: ${pincode}`,
+              );
             }
-          }
+          },
         },
       ],
       'plain-text',
-      locationInfo?.pincode || ''
+      locationInfo?.pincode || '',
     );
   };
 
   return (
     <>
-    
-    <TouchableOpacity 
-        style={styles.deliveryLocationBar} 
+      <TouchableOpacity
+        style={styles.deliveryLocationBar}
         onPress={handleLocationPress}
         activeOpacity={0.7}
       >
@@ -148,22 +170,28 @@ export default function CurrentLocation() {
             <Text style={styles.locationPinIcon}>📍</Text>
             <Text style={styles.deliverToText}>Deliver to</Text>
             {isLoadingLocation ? (
-              <ActivityIndicator size="small" color="#666" style={styles.loadingIndicator} />
+              <ActivityIndicator
+                size="small"
+                color="#666"
+                style={styles.loadingIndicator}
+              />
             ) : locationError ? (
               <Text style={styles.errorText}>Tap to retry</Text>
-            ) : locationInfo && locationInfo.pincode && locationInfo.pincode !== 'N/A' ? (
+            ) : locationInfo &&
+              locationInfo.pincode &&
+              locationInfo.pincode !== 'N/A' ? (
               <Text style={styles.pincodeDisplay}>{locationInfo.pincode}</Text>
             ) : (
               <Text style={styles.pincodeDisplay}>Tap to get location</Text>
             )}
           </View>
-          <TouchableOpacity onPress={handleChangeLocation} style={styles.editButton}>
+          {/* <TouchableOpacity onPress={handleChangeLocation} style={styles.editButton}>
             <Text style={styles.editIcon}>✏️</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
-      </TouchableOpacity> 
+      </TouchableOpacity>
     </>
-  )
+  );
 }
 const styles = StyleSheet.create({
   container: {
@@ -252,8 +280,8 @@ const styles = StyleSheet.create({
   },
   deliveryLocationBar: {
     backgroundColor: '#f5f5f5',
-    marginHorizontal: 15,
-    marginVertical: 8,
+    // marginHorizontal: 15,
+    // marginVertical: 8,
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -273,12 +301,12 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   deliverToText: {
-    fontSize: 14,
+    fontSize: hp(1.9),
     color: '#666',
     marginRight: 8,
   },
   pincodeDisplay: {
-    fontSize: 16,
+    fontSize: hp(1.5),
     fontWeight: 'bold',
     color: '#333',
   },

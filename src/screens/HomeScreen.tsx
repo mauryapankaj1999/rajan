@@ -9,10 +9,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import LinearGradient from 'react-native-linear-gradient';
 import { Header, CategoriesFlatList, Slider } from '../components';
 import LocationService, { LocationData, LocationError, LocationInfo } from '../utils/locationService';
 import CurrentLocation from '../components/CurrentLocation';
-
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 const HomeScreen: React.FC = () => {
   
   const handleMenuPress = () => {
@@ -42,8 +46,22 @@ const HomeScreen: React.FC = () => {
 
       <ScrollView showsVerticalScrollIndicator={false}>
       <CurrentLocation />
+        <CategoriesFlatList  />
+
+        <LinearGradient
+      colors={['#AE5195', '#FF7DDC', '#F52ABF']}
+      start={{ x: 1, y: 1 }}
+      end={{ x: 0, y: 0 }}
+      style={styles.gradientContainer }
+    >
+
+        
+        
+        <Text style={styles.sectionTitle}>अब घर बैठे बुलाइए प्रोफेशनल — झंझट खत्म!</Text>
+    </LinearGradient>
+
+
         <Slider  />
-        <CategoriesFlatList onCategoryPress={handleCategoryPress} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -58,11 +76,15 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: hp(2.3),
     fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 15,
-    paddingHorizontal: 15,
+    color: '#fff',
+    // marginBottom: 15,
+    paddingHorizontal: 5,
+    textAlign: 'center',
+    fontFamily: 'Inter_18pt-Regular',
+    // marginTop: hp(2),
+    
   },
   featuredContainer: {
     flexDirection: 'row',
@@ -180,6 +202,13 @@ const styles = StyleSheet.create({
   editIcon: {
     fontSize: 16,
     color: '#666',
+  },
+  gradientContainer: {
+    paddingHorizontal: 15,
+    paddingVertical: 15,
+    borderRadius: 15,
+    marginHorizontal: 15,
+    marginVertical: 15,
   },
 });
 

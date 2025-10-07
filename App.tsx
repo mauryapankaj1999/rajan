@@ -15,8 +15,8 @@ function App(): React.JSX.Element {
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <HomeScreen />
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'light-content'} />
+      <HomeScreen /> 
     </SafeAreaProvider>
   );
 }
